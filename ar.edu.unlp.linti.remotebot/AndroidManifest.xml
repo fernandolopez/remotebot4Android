@@ -1,0 +1,39 @@
+<!--
+  Copyright (c) 2012 Fernando E. M. López <flopez AT linti.unlp.edu.ar>.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the GNU Public License v3.0
+  which accompanies this distribution, and is available at
+  http://www.gnu.org/licenses/gpl.html
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="ar.edu.unlp.linti.remotebot"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="15" />
+	<uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".Setup"
+            android:label="@string/title_activity_main" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Controls"
+            android:label="@string/title_activity_controls" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ar.edu.unlp.linti.remotebot.Setup" />
+        </activity>
+    </application>
+
+</manifest>

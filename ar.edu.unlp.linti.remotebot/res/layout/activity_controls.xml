@@ -1,0 +1,118 @@
+<!--
+  Copyright (c) 2012 Fernando E. M. López <flopez AT linti.unlp.edu.ar>.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the GNU Public License v3.0
+  which accompanies this distribution, and is available at
+  http://www.gnu.org/licenses/gpl.html
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_controls"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <CheckBox
+        android:id="@+id/slow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="@string/slow_turn" />
+
+    <CheckBox
+        android:id="@+id/senses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/obstacle_distance" />
+
+    <CheckBox
+        android:id="@+id/dontCrash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_on_obstacle" />
+
+    <SeekBar
+        android:id="@+id/speed"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin"
+        android:contentDescription="@string/speed"
+        android:progress="@integer/defaultSpeed" />
+
+    <TableLayout
+        android:id="@+id/table"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin"
+        android:layout_marginTop="@dimen/margin"
+        android:gravity="center"
+        android:stretchColumns="*" >
+
+        <TableRow
+            android:id="@+id/tableRow1"
+>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </RelativeLayout>
+
+            <ImageButton
+                android:id="@+id/imageButton4"
+                android:contentDescription="@string/forward"
+                android:onClick="forward"
+                android:src="@drawable/ic_up" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
+
+>
+
+            <ImageButton
+                android:id="@+id/imageButton1"
+                android:contentDescription="@string/left"
+                android:onClick="turnLeft"
+                android:src="@drawable/ic_left" />
+
+            <ImageButton
+                android:id="@+id/imageButton2"
+                android:contentDescription="@string/stop"
+                android:onClick="stop"
+                android:src="@drawable/ic_stop" />
+
+            <ImageButton
+                android:id="@+id/imageButton3"
+                android:contentDescription="@string/right"
+                android:onClick="turnRight"
+                android:src="@drawable/ic_right" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </RelativeLayout>
+
+            <ImageButton
+                android:id="@+id/imageButton5"
+                android:contentDescription="@string/backward"
+                android:onClick="backward"
+                android:src="@drawable/ic_down" />
+
+        </TableRow>
+
+    </TableLayout>
+
+    <TextView
+        android:id="@+id/sensesView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible" />
+
+</LinearLayout>
