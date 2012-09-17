@@ -1,10 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2012 Fernando E. M. López <flopez AT linti.unlp.edu.ar>.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v3.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/gpl.html
- ******************************************************************************/
 package ar.edu.unlp.linti.remotebot;
 
 import java.util.Vector;
@@ -27,7 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import ar.edu.unlp.linti.robot.Board;
 import ar.edu.unlp.linti.robot.exceptions.ClientSideException;
-import ar.edu.unlp.linti.robot.exceptions.CommunicationException;
+import ar.edu.unlp.linti.robot.exceptions.RemoteBotException;
 import ar.edu.unlp.linti.robot.exceptions.ConnectionException;
 import ar.edu.unlp.linti.robot.exceptions.ServerSideException;
 import ar.edu.unlp.linti.robot.exceptions.ServerTimeoutException;
@@ -35,8 +28,9 @@ import ar.edu.unlp.linti.robot.exceptions.ServerTimeoutException;
 public class Setup extends Activity {
 	// Defaults
 	//private final String defaultServer = "http://10.0.0.1:8000";
-	private final String defaultServer = "http://192.168.1.3:8000";
-    private final String defaultDevice = "/dev/ttyUSB0";
+	//private final String defaultServer = "http://192.168.1.3:8000";
+	private final String defaultServer = "http://192.168.1.126:8000";
+	private final String defaultDevice = "/dev/ttyUSB0";
     private final Integer defaultRobotId = 1;
 	
 	// Parámetros para la otra activity
@@ -52,6 +46,8 @@ public class Setup extends Activity {
 	private Spinner robotSpinner;
 	private ArrayAdapter<String> devAdapter;
 	private ArrayAdapter<Integer> robAdapter;
+	
+	// Tareas
 	private AsyncTask<String, Object, int[]> deviceTask;
 	private AsyncTask<String, Object, JSONObject> serverTask;
 
@@ -60,7 +56,7 @@ public class Setup extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         toggleActive(R.id.progressBar1, false);
         toggleActive(R.id.deviceOk, false);
         toggleActive(R.id.robotOk, false);
@@ -107,16 +103,17 @@ public class Setup extends Activity {
     	TextView tv = (TextView) findViewById(R.id.url);
     	this.server = tv.getText().toString();
 
-        toggleActive(R.id.progressBar1, false);
-        toggleActive(R.id.deviceOk, false);
-        toggleActive(R.id.robotOk, false);
-    	toggleActive(R.id.progressBar1, true);
+    	cancelThreads();
+
     	
-    	if (this.serverTask != null && !this.serverTask.isCancelled()){
-    		this.serverTask.cancel(true);
-    	}
     	this.serverTask = new AsyncTask<String,Object,JSONObject>(){
     		String error = null;
+    		@Override
+    		protected void onPreExecute(){
+    	        toggleActive(R.id.deviceOk, false);
+    	        toggleActive(R.id.robotOk, false);
+    	    	toggleActive(R.id.progressBar1, true);
+    		}
 			@Override
 			protected JSONObject doInBackground(String... args) {
 				String server = args[0];
@@ -131,7 +128,7 @@ public class Setup extends Activity {
 					error = "Error del lado del servidor. " + e.getMessage();
 				} catch (ConnectionException e) {
 					error = "Error conectando con el servidor.\nVerifique la URL.";
-				} catch (CommunicationException e) {
+				} catch (RemoteBotException e) {
 					error = "Error indeterminado al conectarse con el servidor";
 				}
 				return result;
@@ -151,11 +148,12 @@ public class Setup extends Activity {
 					for (int i = 0; i < boards.length(); i++){
 						Setup.this.devices.add(boards.getString(i));
 					}
-					if (boards.length() == 0){
-						Setup.this.devices.add(Setup.this.defaultDevice);
-					}
 					Setup.this.devAdapter.notifyDataSetChanged();
-				} catch (JSONException e) {
+					if (boards.length() == 0){
+						Util.alert(Setup.this, "No se encontraron placas XBee conectadas al servidor");
+						return;
+					}
+		    	} catch (JSONException e) {
 					Util.alert(Setup.this, "El servidor devolvió un código desconocido");
 					return;
 				}
@@ -164,31 +162,45 @@ public class Setup extends Activity {
     	}.execute(this.server);
 
     }
-    public void deviceOk(View v) throws CommunicationException{
-    	toggleActive(R.id.progressBar1, true);
-    	toggleActive(R.id.robotOk, false);
-    	if (this.deviceTask != null && !this.deviceTask.isCancelled()){
+    private void cancelThreads(){
+       	if (this.deviceTask != null && !this.deviceTask.isCancelled()){
     		this.deviceTask.cancel(true);
     	}
+       	if (this.serverTask != null && !this.serverTask.isCancelled()){
+       		this.serverTask.cancel(true);
+       	}
+    }
+    public void deviceOk(View v) throws RemoteBotException{
+    	this.cancelThreads();
     	this.deviceTask = new AsyncTask<String,Object,int[]>(){
+    		@Override
+    		protected void onPreExecute(){
+    	    	toggleActive(R.id.progressBar1, true);
+    	    	toggleActive(R.id.robotOk, false);
+    		}
     		String error = null;
 			@Override
 			protected int[] doInBackground(String... args) {
 		    	// Work
 				Board board = null;
-		    	int[] robotsArray;
 				try {
 					board = new Board(args[0], args[1]);
-					robotsArray = board.report();
-					return robotsArray;
 				} catch (ServerTimeoutException e) {
 					error = "Timeout intentando conectar con el servidor";
 				} catch (ServerSideException e) {
 					error = "Error instanciando Board(), verifique que el XBee esté conectado";
-				} catch (CommunicationException e) {
-					error = "Error indeterminado comunicandose con el servidor";
+				} catch (RemoteBotException e) {
+					error = "Error indeterminado comunicandose con el servidor: " + e.toString();
 				}
-				return new int[0];
+				try {
+					return  board.report();
+				} catch (RemoteBotException e) {
+					int[] def = new int[4];
+					for (int i = 0; i < 4; i++){
+						def[i] = i + 1;
+					}
+					return def;
+				}
 			}
 			@Override
 			protected void onPostExecute(int[] robotsArray){
@@ -222,6 +234,10 @@ public class Setup extends Activity {
     	this.startActivity(controls);
     	toggleActive(R.id.progressBar1, false);
     }
-    
+    @Override
+    public void onPause(){
+    	super.onPause();
+    	cancelThreads();
+    }
 
 }

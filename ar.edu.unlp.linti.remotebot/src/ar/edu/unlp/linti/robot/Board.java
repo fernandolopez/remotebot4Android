@@ -1,10 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2012 Fernando E. M. López <flopez AT linti.unlp.edu.ar>.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v3.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/gpl.html
- ******************************************************************************/
 package ar.edu.unlp.linti.robot;
 
 
@@ -13,25 +6,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ar.edu.unlp.linti.remotebot.AndroidBridge;
-import ar.edu.unlp.linti.robot.exceptions.CommunicationException;
+import ar.edu.unlp.linti.robot.exceptions.RemoteBotException;
 
 public class Board implements BoardInterface {
+	/*
+	 * Representa la conexión de la App con el par servidor-placa
+	 */
 	private String device;
 	private String server;
 
-	public Board(String server, String devicename) throws CommunicationException{
+	public Board(String server, String devicename) throws RemoteBotException{
 		this.server = server;
 		this.device = devicename;
 		this.command("board", 0, "__init__", new JSONArray());
 
 	}
-	public void setDevice(String device) {
-		this.device = device;
-	}
-	public String getDevice() {
-		return device;
-	}
-	public JSONObject command(String target, int id, String command, JSONArray args) throws CommunicationException {
+
+	public JSONObject command(String target, int id, String command, JSONArray args) throws RemoteBotException {
 		JSONArray container = new JSONArray();
 		JSONObject message = new JSONObject();
 		JSONObject jsonResponse = null;
@@ -46,15 +37,14 @@ public class Board implements BoardInterface {
 			message.put("command", command);
 			message.put("args", args);
 		} catch (JSONException e) {
-			throw new CommunicationException(e.getMessage());
+			throw new RemoteBotException(e.getMessage());
 		}		
-		// Cliente en un thread separado
 		jsonResponse = AndroidBridge.post(server, container);
 
 		return jsonResponse;
 
 	}
-	public int[] report() throws CommunicationException {
+	public int[] report() throws RemoteBotException {
 		JSONArray robots;
 		int []ret;
 		try {
@@ -66,7 +56,7 @@ public class Board implements BoardInterface {
 				ret[i] = robots.getInt(i);
 			}
 		} catch (JSONException e) {
-			throw new CommunicationException(e.toString());
+			throw new RemoteBotException(e.toString());
 		}
 		return ret;
 	}

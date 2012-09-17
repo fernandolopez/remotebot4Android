@@ -1,10 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2012 Fernando E. M. López <flopez AT linti.unlp.edu.ar>.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v3.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/gpl.html
- ******************************************************************************/
 package ar.edu.unlp.linti.remotebot;
 
 
@@ -30,7 +23,9 @@ import org.json.*;
 import ar.edu.unlp.linti.robot.exceptions.*;
 
 public class AndroidBridge {
-	public static synchronized JSONObject post(String url, JSONArray commands) throws CommunicationException{
+	/* Módulo de comunicaciones de bajo nivel */
+	public static synchronized JSONObject post(String url, JSONArray commands) throws RemoteBotException{
+		/* Método de bajo nivel que envía una petición POST al servidor */
 		HttpResponse response = null;
 		String str = null;
 		JSONObject jsonResponse = null;
@@ -43,18 +38,17 @@ public class AndroidBridge {
 		// Cliente http sin tanto buffering
 		BasicHttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setTcpNoDelay(httpParams, true);
-        HttpConnectionParams.setConnectionTimeout(httpParams, 30000);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
+        HttpConnectionParams.setSoTimeout(httpParams, 3000);
         HttpClient client = new DefaultHttpClient(httpParams);		
+
 		
         HttpPost post = new HttpPost(url);
         try {
 			post.setEntity(new UrlEncodedFormEntity(form, "UTF-8"));
+			response = client.execute(post);
 		} catch (UnsupportedEncodingException e) {
 			throw new ClientSideException(e.toString());
-		}
-        
-        try {
-			response = client.execute(post);
 		} catch (ClientProtocolException e) {
 			throw new ClientSideException(e.toString());
 		} catch (IOException e) {
@@ -62,15 +56,15 @@ public class AndroidBridge {
 		}
         StatusLine statusLine = response.getStatusLine();
         if(statusLine.getStatusCode() != HttpURLConnection.HTTP_OK){
-        	throw new CommunicationException();
+        	throw new RemoteBotException();
         }
 
         try {
 			str = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			throw new CommunicationException(e.toString());
+			throw new RemoteBotException(e.toString());
 		} catch (IOException e) {
-			throw new CommunicationException(e.toString());
+			throw new RemoteBotException(e.toString());
 		}
  
 		try {
@@ -86,7 +80,8 @@ public class AndroidBridge {
 		return jsonResponse;
 
 	}
-	public static JSONObject moduleCommand(String url, String command, JSONArray args) throws CommunicationException{ 
+	public static JSONObject moduleCommand(String url, String command, JSONArray args) throws RemoteBotException{ 
+		/* Comandos que no van a una placa específica, por ejemplo boards() */
 		JSONArray container = new JSONArray();
 		JSONObject message = new JSONObject();
 		JSONObject jsonResponse = null;
@@ -99,7 +94,6 @@ public class AndroidBridge {
 		} catch (JSONException e) {
 			throw new ClientSideException(e.getMessage());
 		}		
-		// Cliente en un thread separado
 		jsonResponse = post(url, container);
 		return jsonResponse;
 	}
