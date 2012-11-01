@@ -154,12 +154,21 @@ public class Robot implements RobotInterface{
 	public void stop() throws RemoteBotException {
 		this.command("stop", null);
 	}
-	public void beep(Integer freq) throws RemoteBotException {
+	public void beep(Integer freq, Integer time) throws RemoteBotException {
 		JSONArray args = new JSONArray();
 		if (freq != null){
 			args.put(freq);
 		}
+		else{
+			args.put(500);
+		}
+		if (time != null){
+			args.put(time);
+		}
 		this.command("beep", args);
+	}
+	public void beep(Integer freq) throws RemoteBotException {
+		beep(freq, null);
 	}
 	public void beep() throws RemoteBotException {
 		beep(null);

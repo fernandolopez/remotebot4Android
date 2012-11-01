@@ -16,7 +16,7 @@ public class MoveAndDontCrash extends AsyncTask<Robot, Object, Object> {
 			try {
 				 if (r.getObstacle()){
 					 r.stop();
-					 r.beep(2000);
+					 r.beep(2000, 1);
 					 Thread.sleep(1000);
 				 }
 				 Thread.sleep(500);

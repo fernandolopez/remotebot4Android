@@ -29,7 +29,8 @@ public class Setup extends Activity {
 	// Defaults
 	//private final String defaultServer = "http://10.0.0.1:8000";
 	//private final String defaultServer = "http://192.168.1.3:8000";
-	private final String defaultServer = "http://192.168.1.126:8000";
+	private final String defaultServer = "http://192.168.1.116:8000";
+	//private final String defaultServer = "http://192.168.43.210:8000";
 	private final String defaultDevice = "/dev/ttyUSB0";
     private final Integer defaultRobotId = 1;
 	
